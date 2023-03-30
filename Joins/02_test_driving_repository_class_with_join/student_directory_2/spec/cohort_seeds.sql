@@ -7,3 +7,5 @@ INSERT INTO cohorts (name, starting_date) VALUES ('March Cohort', '01/03/2023');
 INSERT INTO cohorts (name, starting_date) VALUES ('April Cohort', '01/04/2023');
 INSERT INTO cohorts (name, starting_date) VALUES ('May Cohort', '01/05/2023');
 
+INSERT INTO students (name, cohort_id) VALUES ('David', '1');
+INSERT INTO students (name, cohort_id) VALUES ('Anna', '2');

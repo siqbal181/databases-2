@@ -1,4 +1,4 @@
-# {{TABLE NAME}} Model and Repository Classes Design Recipe
+# post Model and Repository Classes Design Recipe
 
 _Copy this recipe template to design and implement Model and Repository classes for a database table._
 
@@ -27,7 +27,7 @@ If seed data is provided (or you already created it), you can skip this step.
 
 ```sql
 -- EXAMPLE
--- (file: spec/seeds_{table_name}.sql)
+-- (file: spec/seeds_posts.sql)
 
 -- Write your SQL seed here. 
 
@@ -35,13 +35,17 @@ If seed data is provided (or you already created it), you can skip this step.
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
+TRUNCATE TABLE posts, comments RESTART IDENTITY; -- replace with your own table name.
 
 -- Below this line there should only be `INSERT` statements.
 -- Replace these statements with your own seed data.
 
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+INSERT INTO posts (title, contents) VALUES ('My first blog', 'This is a fun blog');
+INSERT INTO posts (title, contents) VALUES ('What I learned at Makers', 'How to use Google');
+
+INSERT INTO comments (title, contents, user_name, posts_id) VALUES ('What I learned at Makers', 'How to use Google', 'dave', 1);
+INSERT INTO comments (title, contents, user_name, posts_id) VALUES ('Complaint', 'You can''t spell', 'bob', 2);
+
 ```
 
 Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
@@ -50,41 +54,29 @@ Run this SQL file on the database to truncate (empty) the table, and insert the 
 psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
 ```
 
-## 3. Define the class names
-
-Usually, the Model class name will be the capitalised table name (single instead of plural). The same name is then suffixed by `Repository` for the Repository class name.
-
-```ruby
-# EXAMPLE
-# Table name: students
-
-# Model class
-# (in lib/cohort.rb)
-class Cohort
-end
-
-# Repository class
-# (in lib/cohort_repository.rb)
-class CohortRepository
-end
-```
-
 ## 4. Implement the Model class
 
 Define the attributes of your Model class. You can usually map the table columns to the attributes of the class, including primary and foreign keys.
 
 ```ruby
 # EXAMPLE
-# Table name: cohorts
+# Table name: students
 
 # Model class
-# (in lib/cohort.rb)
+# (in lib/student.rb)
 
-class Cohort
+class Post
 
   # Replace the attributes by your own columns.
-  attr_accessor :id, :cohort_name, :start_date
+  attr_accessor :id, :title, :contents
 end
+
+class Comment
+
+  # Replace the attributes by your own columns.
+  attr_accessor :id, :title, :contents, :user_name, :posts_id
+end
+
 ```
 
 *You may choose to test-drive this class, but unless it contains any more logic than the example above, it is probably not needed.*
@@ -97,47 +89,22 @@ Using comments, define the method signatures (arguments and return value) and wh
 
 ```ruby
 # EXAMPLE
-# Table name: cohorts
+# Table name: students
 
 # Repository class
-# (in lib/cohort_repository.rb)
+# (in lib/student_repository.rb)
 
-class CohortRepository
+class PostRepository
 
-  # Selecting all records
-  # No arguments
-  def all
+
+  def find_with_comments(id)
     # Executes the SQL query:
-    # SELECT id, cohort_name, start_date FROM cohorts;
+    # SELECT posts.title, posts.contents, comments.title, comments.contents, comments.user_name 
+    #    FROM posts JOIN comments ON posts.id = comments.posts_id WHERE posts.id = $1;
 
-    # Returns an array of Cohort objects.
+    # Returns a single Post object with an array of Comments.
   end
 
-  # Gets a single record by its ID
-  # One argument: the id (number)
-  def find(id)
-    # Executes the SQL query:
-    # SELECT id, cohort_name, start_date FROM cohorts WHERE id = $1;
-
-    # Returns a single Student object.
-  end
-    # selects a cohort along with associated students
-    # given the cohort ID
-
-  def find_with_students(id)
-      #   SELECT cohorts.id AS "id", 
-      # cohorts.name AS "cohort_name", 
-      # cohorts.starting_date as "starting_date",
-      # students.name AS "student_name"
-      # 	FROM cohorts
-      # 	JOIN students
-      # 	ON cohorts.id = students.cohort_id
-      # 	WHERE cohorts.id = '$1';
-
-      # Returns a cohort object
-      # with the array of student objects
-
-  end
 end
 ```
 
@@ -151,36 +118,14 @@ These examples will later be encoded as RSpec tests.
 # EXAMPLES
 
 # 1
-# Get all cohorts
+# find_with_comments
+repo = PostRepository.new
 
-repo = CohortRepository.new
+post = repo.find_with_comments(1)
 
-cohorts = repo.all
-
-expect(cohorts.length).to eq(2)
-expect(cohorts.cohort_name).to eq('March Cohort')
-
-# 2
-# Get a single cohort
-
-repo = CohortRepository.new
-
-cohort = repo.find(1)
-
-expect(cohort.id).to eq(1)
-expect(cohort.cohort_name).to eq('March Cohort')
-
-# 3 
-# find with students method
-
-repo = CohortRepository.new
-
-cohort = repo.find_with_students(1)
-expect(cohort.cohort_name).to eq('March')
-expect(cohort.student_name).to eq('Alice')
-expect(cohort.length).to eq(1)
-
-
+post.comments.length # =>  1
+post.comments.user_name # =>  'dave'
+post.comments.contents # =>  'How to use Google'
 
 ```
 
@@ -215,3 +160,5 @@ end
 ## 8. Test-drive and implement the Repository class behaviour
 
 _After each test you write, follow the test-driving process of red, green, refactor to implement the behaviour._
+
+<!-- BEGIN GENERATED SECTION DO NOT EDIT -->

@@ -36,8 +36,8 @@ class UsersRepository
     end
   
     def create(user)
-        sql = 'INSERT INTO users (email_address, user_name) VALUES($1, $2);'
-        sql_params = [user.email_address, user.user_name]
+        sql = 'INSERT INTO users (email_address, user_name, id) VALUES($1, $2, $3);'
+        sql_params = [user.email_address, user.user_name, user.id]
 
         DatabaseConnection.exec_params(sql, sql_params)
 

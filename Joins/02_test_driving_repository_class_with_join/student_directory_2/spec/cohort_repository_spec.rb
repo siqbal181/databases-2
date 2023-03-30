@@ -26,4 +26,14 @@ RSpec.describe CohortRepository do
         expect(cohort.id).to eq("1")
         expect(cohort.name).to eq('March Cohort')
     end
+
+    it "finds a cohort with related students" do
+        repo = CohortRepository.new
+
+        cohort = repo.find_with_students(1)
+
+        expect(cohort.name).to eq('March Cohort')
+        expect(cohort.students.first.name).to eq('David')
+        expect(cohort.students.length).to eq(1)
+    end
 end

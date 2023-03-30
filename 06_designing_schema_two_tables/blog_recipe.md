@@ -89,6 +89,8 @@ Post -> one to many -> Comments
 Comment -> many to one -> Post
 
 -> Therefore, the foreign key is on the posts table. - 'comment_id'
+
+-- WHICHEVER ONE IS ON THE ONE SIDE HAS THE ID (POST ID)
 ```
 
 ## 4. Write the SQL.
@@ -96,21 +98,22 @@ Comment -> many to one -> Post
 ```sql
 
 -- Create the table without the foreign key first.
-CREATE TABLE comments (
-    id SERIAL PRIMARY KEY,
-    content text,
-    user_name text
-);
-
--- Then the table with the foreign key first.
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     title text,
+    contents text
+);
+
+-- Then the table with the foreign key first.
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    title text,
     contents text,
+    user_name text
 
 -- The foreign key name is always {other_table_singular}_id
-  comments_id int,
-  constraint fk_comments foreign key(comments_id) references comments(id) 
+  posts_id int,
+  constraint fk_posts foreign key(posts_id) references posts(id) 
   on delete cascade 
 );
 
